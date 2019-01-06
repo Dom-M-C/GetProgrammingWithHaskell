@@ -44,5 +44,29 @@ rotChar charToRot = rotN sizeOfAlphabet charToRot
 rotString :: String -> String
 rotString str = map rotChar str
 
+----
 
+
+xorBool :: Bool -> Bool -> Bool
+xorBool a b = (a || b) && (not (a && b))
+
+xorPair :: (Bool, Bool) -> Bool
+xorPair (b1,b2) = xorBool b1 b2
+
+xor :: [Bool] -> [Bool] -> [Bool]
+xor ls1 ls2 = map xorPair (zip ls1 ls2)
+
+type Bits = [Bool]
+
+intToBits' :: Int -> Bits
+intToBits' 0 = [False]
+intToBits' 1 = [True]
+intToBits' n = let
+    remainder = n `mod` 2
+    nextVal = n `div` 2
+    in if remainder == 0
+        then False : intToBits' nextVal
+        else True : intToBits' nextVal
+
+--15.6
 
