@@ -127,7 +127,42 @@ applyPad pad text = bitsToString $ applyPad' pad text
 encodeDecodeWithMyPad :: String -> String
 encodeDecodeWithMyPad = applyPad myPad
 
+class Cipher a where
+    encode :: a -> String -> String
+    decode :: a -> String -> String
 
+data Rot = Rot
+data OneTimePad = Pad String
 
+instance Cipher Rot where
+    encode Rot text = rotString text
+    decode Rot text = rotString text
 
+instance Cipher OneTimePad where
+    encode (Pad pad) text = applyPad pad text
+    decode (Pad pad) text = applyPad pad text
 
+myOneTimePad :: OneTimePad
+myOneTimePad = Pad (cycle [minBound .. maxBound])
+
+--pseudo random number generator: PRNG
+--linear congruential generator algorithm
+prng :: Int -> Int -> Int -> Int -> Int
+prng a b maxNo seed = (a * seed + b)  `mod` maxNo
+
+examplePrng :: Int -> Int
+examplePrng = prng 1337 7 100
+
+prngPad :: Int -> [Int]
+prngPad seed = examplePrng seed : (prngPad (prng (seed - 7) (seed + 7) (seed * 7) seed))
+
+myStreamPad = Pad (bitsToString $ map intToBits $ prngPad 5)
+
+data StreamCipher = Stream OneTimePad
+
+--todo: SteamCipher implementation
+{-
+instance Cipher StreamCipher where
+    encode (Stream (Pad )) text = applyPad pad text
+    decode (Stream myStreamPad pad) text = applyPad pad text
+-}
