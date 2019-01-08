@@ -39,7 +39,9 @@ type First = String
 type Middle = String
 type Last = String
 
-data Name = BiName (First, Last) | TriName (First, Middle, Last) deriving (Show, Eq)
+data Name = BiName (First, Last)
+    | TriName (First, Middle, Last)
+    | TwoInitialsWithLast Char Char Last deriving (Show, Eq)
 
 instance Ord Name where
     compare (BiName(f1, l1)) (BiName(f2, l2)) = compare (l1, f1) (l2, f2)
