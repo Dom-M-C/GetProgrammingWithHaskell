@@ -45,7 +45,14 @@ organs = [Heart,Heart,Brain,Spleen,Spleen,Kidney]
 ids :: [Int]
 ids = [2,7,13,14,21,24]
 
-orgMap = Map.fromList $ zip ids organs
+orgMap [] orgs = orgs
+orgMap (o:os) orgs =
+    let
+        lkup = Map.lookup o orgs
+        found (Just x) = Map.insert o (x + 1) orgs
+        found Nothing = Map.insert o 1 orgs
+    in
+        orgMap os (found lkup)
 
 {-
 organInventory :: [Organ] -> Map.Map Organ Int
