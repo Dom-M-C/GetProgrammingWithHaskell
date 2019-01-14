@@ -45,6 +45,8 @@ organs = [Heart,Heart,Brain,Spleen,Spleen,Kidney]
 ids :: [Int]
 ids = [2,7,13,14,21,24]
 
+organCatalog = Map.fromList $ zip ids organs
+
 orgMap [] orgs = orgs
 orgMap (o:os) orgs =
     let
