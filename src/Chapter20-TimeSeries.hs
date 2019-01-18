@@ -106,3 +106,37 @@ meanTs (TS ks vs)
             avg = mean cleanVals
         in
             Just avg
+
+type CompareFunc a = a -> a -> a
+type TsCompareFunc a = (Int, Maybe a) -> (Int, Maybe a) -> (Int, Maybe a)
+
+makeTsCompare :: Eq a => CompareFunc a -> TsCompareFunc a
+makeTsCompare func =
+    let
+        newFunc (i1, Nothing) (i2, Nothing) = (i1, Nothing)
+        newFunc (_, Nothing) (i2, val) = (i2, val)
+        newFunc (i1, val) (_, Nothing) = (i1, val)
+        newFunc (i1, Just val1) (i2, Just val2)
+            | func val1 val2 == val1 = (i1, Just val1)
+            | otherwise = (i2, Just val2)
+    in
+        newFunc
+
+
+compareTs :: Eq a => CompareFunc a -> TS a -> Maybe (Int, Maybe a)
+compareTs func (TS [] []) = Nothing
+compareTs func (TS times values)
+    | all(==Nothing) values = Nothing
+    | otherwise =
+        let
+            pairs = zip times values
+            best = foldl (makeTsCompare func) (0, Nothing) pairs
+        in
+            Just best
+
+minTs :: Ord a => TS a -> Maybe (Int, Maybe a)
+minTs = compareTs min
+
+maxTs :: Ord a => TS a -> Maybe (Int, Maybe a)
+maxTs = compareTs max
+
