@@ -140,3 +140,21 @@ minTs = compareTs min
 maxTs :: Ord a => TS a -> Maybe (Int, Maybe a)
 maxTs = compareTs max
 
+diffPair :: Num a => Maybe a -> Maybe a -> Maybe a
+diffPair _ Nothing = Nothing
+diffPair Nothing _ = Nothing
+diffPair (Just x) (Just y) = Just (x - y)
+
+
+diffTs :: Num a => TS a -> TS a
+diffTs (TS [] []) = mempty
+diffTs (TS keys values) =
+    let
+        shiftValues = tail values
+        diffValues = zipWith diffPair shiftValues values
+    in
+        TS keys (Nothing:diffValues)
+
+--mean :: Real a => [a] -> Double
+--mean = undefined
+
