@@ -5,4 +5,4 @@ import qualified Chapter22 as C
 
 
 main :: IO ()
-main = C.main
+main = C.toIntsMain
