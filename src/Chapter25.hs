@@ -57,7 +57,7 @@ sortSection start size bytes =  mconcat [before, changed, after]
     where
         (before, rest) = BC.splitAt start bytes
         (target, after) = BC.splitAt size rest
-        changed = BC.sort target
+        changed = BC.reverse $ BC.sort target
 
 randomSortSection :: BC.ByteString -> IO BC.ByteString
 randomSortSection bytes = do
