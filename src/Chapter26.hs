@@ -61,3 +61,44 @@ myBooks =  [book1,book2,book3]
 
 mainBooks :: IO ()
 mainBooks = TIO.writeFile "books.html" $ booksToHtml myBooks
+
+type MarcRecordRaw = B.ByteString
+type MarcLeaderRaw = B.ByteString
+
+getLeader :: MarcRecordRaw -> MarcLeaderRaw
+getLeader raw = B.take leaderLength raw
+
+leaderLength :: Int
+leaderLength = 24
+
+rawToInt :: B.ByteString -> Int
+rawToInt = read . T.unpack . E.decodeUtf8
+
+getRecordLength :: MarcLeaderRaw -> Int
+getRecordLength lead = rawToInt $ B.take 5 lead
+
+nextAndRest :: B.ByteString -> (MarcRecordRaw, B.ByteString)
+nextAndRest marcStream = B.splitAt recordLength marcStream
+    where
+        recordLength = getRecordLength marcStream
+
+allRecords :: B.ByteString -> [MarcRecordRaw]
+allRecords marcStream
+    | marcStream == B.empty = []
+    | otherwise = next : allRecords text
+    where
+        (next, text) = nextAndRest marcStream
+
+marcMain :: IO ()
+marcMain = do
+    marcData <- B.readFile "sample.mrc"
+    let marcRecords = allRecords marcData
+    print (length marcRecords)
+
+type MarcDirectoryRaw = B.ByteString
+
+
+
+
+
+
