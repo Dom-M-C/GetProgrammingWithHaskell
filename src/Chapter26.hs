@@ -6,6 +6,7 @@ import qualified Data.Text.IO as TIO
 import qualified Data.Text.Encoding as E
 
 import Data.Maybe
+import Control.Monad
 
 type Author = T.Text
 type Title = T.Text
@@ -65,11 +66,11 @@ mainBooks = TIO.writeFile "books.html" $ booksToHtml myBooks
 type MarcRecordRaw = B.ByteString
 type MarcLeaderRaw = B.ByteString
 
-getLeader :: MarcRecordRaw -> MarcLeaderRaw
-getLeader raw = B.take leaderLength raw
-
 leaderLength :: Int
 leaderLength = 24
+
+getLeader :: MarcRecordRaw -> MarcLeaderRaw
+getLeader raw = B.take leaderLength raw
 
 rawToInt :: B.ByteString -> Int
 rawToInt = read . T.unpack . E.decodeUtf8
@@ -89,16 +90,65 @@ allRecords marcStream
     where
         (next, text) = nextAndRest marcStream
 
+type MarcDirectoryRaw = B.ByteString
+
+getBaseAddress :: MarcLeaderRaw -> Int
+getBaseAddress = rawToInt . B.take 5 . B.drop 12
+
+getDirectoryLength :: MarcLeaderRaw -> Int
+getDirectoryLength leader = getBaseAddress leader - (leaderLength + 1)
+
+getDirectory :: MarcRecordRaw -> MarcDirectoryRaw
+getDirectory record = B.take (getDirectoryLength record) $ B.drop leaderLength record
+
+
+type MarcDirectoryEntryRaw = B.ByteString
+
+dirEntryLength :: Int
+dirEntryLength = 12
+
+splitDirectory :: MarcDirectoryRaw -> [MarcDirectoryEntryRaw]
+splitDirectory dir
+    | dir == B.empty = []
+    | otherwise = nextEntry : splitDirectory rest
+    where
+        (nextEntry, rest) = B.splitAt dirEntryLength dir
+
+data FieldMetadata = FieldMetadata
+    { tag           :: T.Text
+    , fieldLength   :: Int
+    , fieldStart    :: Int } deriving Show
+
+makeFieldMetadata :: MarcDirectoryEntryRaw -> FieldMetadata
+makeFieldMetadata entry = FieldMetadata textTag theLength theStart
+    where
+        (theTag, rest) = B.splitAt 3 entry
+        textTag = E.decodeUtf8 theTag
+        (rawLength, rawStart) = B.splitAt 4 rest
+        theLength = rawToInt rawLength
+        theStart = rawToInt rawStart
+
+getFieldMetadata :: [MarcDirectoryEntryRaw] -> [FieldMetadata]
+getFieldMetadata = map makeFieldMetadata
+
+type FieldText = T.Text
+
+getTextField :: MarcRecordRaw -> FieldMetadata -> FieldText
+getTextField record meta = E.decodeUtf8 byteStringValue
+    where
+        recordLength = getRecordLength record
+        baseAddress = getBaseAddress record
+        baseRecord = B.drop baseAddress record
+        baseAtEntry = B.drop (fieldStart meta) baseRecord
+        byteStringValue = B.take (fieldLength meta) baseAtEntry
+
+
 marcMain :: IO ()
 marcMain = do
     marcData <- B.readFile "sample.mrc"
     let marcRecords = allRecords marcData
-    print (length marcRecords)
-
-type MarcDirectoryRaw = B.ByteString
-
-
-
-
-
-
+    --let all = mconcat $ map getDirectory marcRecords
+    --mapM_ print (splitDirectory base)
+    let first = splitDirectory . getDirectory $ marcRecords !! 0
+    let meta = getFieldMetadata first
+    mapM_ print meta
