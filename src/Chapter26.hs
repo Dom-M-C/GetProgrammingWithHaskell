@@ -149,6 +149,81 @@ marcMain = do
     let marcRecords = allRecords marcData
     --let all = mconcat $ map getDirectory marcRecords
     --mapM_ print (splitDirectory base)
-    let first = splitDirectory . getDirectory $ marcRecords !! 0
-    let meta = getFieldMetadata first
-    mapM_ print meta
+    let first = getMetadata $ marcRecords !! 0
+
+    mapM_ print first
+
+fieldDelimiter :: Char
+fieldDelimiter = toEnum 31
+
+type Tag = T.Text
+type Subfield = Char
+
+titleTag :: Tag
+titleTag = "245"
+
+titleSubfield :: Subfield
+titleSubfield = 'a'
+
+authorTag :: Tag
+authorTag = "100"
+
+authorSubfield :: Subfield
+authorSubfield = 'a'
+
+getMetadata :: MarcRecordRaw -> [FieldMetadata]
+getMetadata = getFieldMetadata . splitDirectory . getDirectory
+
+lookupFieldMetadata :: Tag -> MarcRecordRaw -> Maybe FieldMetadata
+lookupFieldMetadata aTag record
+    | length result > 0 = Just (head result)
+    | otherwise = Nothing
+    where
+        result = filter ((==aTag) . tag) $ getMetadata record
+
+type Field = T.Text
+
+lookupSubfield :: Maybe FieldMetadata -> Subfield -> MarcRecordRaw -> Maybe Field
+lookupSubfield Nothing _ _ = Nothing
+lookupSubfield (Just meta) subfield record
+    | results == [] = Nothing
+    | otherwise = Just ((T.drop 1 . head) results)
+    where
+        rawField = getTextField record meta
+        subfields = T.split (== fieldDelimiter) rawField
+        results = filter ((== subfield) . T.head) subfields
+
+lookupValue :: Tag -> Subfield -> MarcRecordRaw -> Maybe Field
+lookupValue aTag subfield record = lookupSubfield meta subfield record
+    where
+        meta = lookupFieldMetadata aTag record
+
+lookupTitle :: MarcRecordRaw -> Maybe Title
+lookupTitle = lookupValue titleTag titleSubfield
+
+lookupAuthor :: MarcRecordRaw -> Maybe Author
+lookupAuthor = lookupValue authorTag authorSubfield
+
+marcToPairs :: B.ByteString -> [(Maybe Title, Maybe Author)]
+marcToPairs stream = zip titles authors
+    where
+        records = allRecords stream
+        titles = map lookupTitle records
+        authors = map lookupAuthor records
+
+pairsToBooks :: [(Maybe Title, Maybe Author)] -> [Book]
+pairsToBooks pairs = map makeBook justPairs
+    where
+        makeBook (title, author) = Book { title = fromJust title, author = fromJust author }
+        justPairs = filter (\(title, author) -> isJust title && isJust author) pairs
+
+processRecords :: Int -> B.ByteString -> Html
+processRecords n = booksToHtml . pairsToBooks . (take n) . marcToPairs
+
+main :: IO ()
+main = do
+    marcData <- B.readFile "sample.mrc"
+    let marcRecords = allRecords marcData
+    --let num = (length marcRecords)
+    let processed = processRecords 2000 marcData
+    TIO.writeFile "books.html" processed
