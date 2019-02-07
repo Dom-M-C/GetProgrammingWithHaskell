@@ -225,5 +225,5 @@ main = do
     marcData <- B.readFile "sample.mrc"
     let marcRecords = allRecords marcData
     --let num = (length marcRecords)
-    let processed = processRecords 2000 marcData
+    let processed = processRecords 100 marcData
     TIO.writeFile "books.html" processed
