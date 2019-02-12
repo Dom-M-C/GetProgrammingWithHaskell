@@ -59,9 +59,43 @@ renderHtml part = mconcat
         partCost  = show (cost part)
         partCount = show (count part)
 
-partsDB :: Map.Map Int RobotPart
-partsDB = Map.fromList keyVals
+partsDb :: Map.Map Int RobotPart
+partsDb = Map.fromList keyVals
     where
         keys = [1..3]
         vals = [leftArm,rightArm,robotHead]
         keyVals = zip keys vals
+
+--insertSnippet :: Maybe Html -> IO ()
+--insertSnippet
+
+partVal :: Maybe RobotPart
+partVal = Map.lookup 1 partsDb
+
+partHtml :: Maybe Html
+partHtml = renderHtml <$> partVal
+
+allParts :: [RobotPart]
+allParts = snd <$> Map.toList partsDb
+
+htmlPartsDb = renderHtml <$> partsDb
+
+leftArmIO :: IO RobotPart
+leftArmIO = return leftArm
+
+data Relationship = Killer | Friendly deriving Show
+
+data Creature a = Robot a | Wolf a | Human a deriving Show
+
+instance Functor Creature where
+    fmap f (Robot r) = Robot (f r)
+    fmap f (Wolf w) = Wolf (f w)
+    fmap f (Human h) = Human (f h)
+
+data Box a = Box a deriving Show
+
+instance Functor Box where
+    fmap f (Box b) = Box (f b)
+
+moreBoxes :: Int -> Box a -> Box [a]
+moreBoxes n b = cycle <$> b -- :(
