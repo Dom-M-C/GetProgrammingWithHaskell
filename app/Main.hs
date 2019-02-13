@@ -5,8 +5,8 @@ module Main where
 import Lib
 
 
-import Chapter26
+import qualified Chapter26 as C
 
 
 main :: IO ()
-main = mainBooks
+main = C.main
