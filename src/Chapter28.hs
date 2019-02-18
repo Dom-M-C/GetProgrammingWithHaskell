@@ -1,6 +1,7 @@
 module Chapter28 where
 
 import qualified Data.Map as Map
+import Data.Maybe
 
 type LatLong = (Double, Double)
 
@@ -35,7 +36,70 @@ printDistance :: Maybe Double -> IO ()
 printDistance Nothing = putStrLn "city not found"
 printDistance (Just d) = putStrLn (show d <> " miles")
 
+distanceFromNy = haversine <$> (Map.lookup "New York" locationDb) <*> Just (0,0)
 
+startingCity = Map.lookup "Carcosa" locationDb
+destCity = Map.lookup "Innsmouth" locationDb
 
+carcosaToInnsmouth = haversine <$> startingCity <*> destCity
+
+mainDistance = do
+    putStrLn "starting city?"
+    start <- getLine
+    let startCity = Map.lookup start locationDb
+    putStrLn "destination?"
+    dest <- getLine
+    let destination = Map.lookup dest locationDb
+    let distance = haversine <$> startCity <*> destination
+    printDistance distance
+
+readInt :: IO Int
+readInt = read <$> getLine
+
+minOfThree i j = min i . min j
+
+minOfIO :: IO Int
+minOfIO = minOfThree <$> readInt <*> readInt <*> readInt
+
+maybeOfthree = minOfThree <$> Just 10 <*> Just 3 <*> Just 6
+
+data User = User
+    {   name :: String
+    ,   gamerId :: Int
+    ,   score :: Int
+    } deriving Show
+
+serverName :: Maybe String
+serverName = Just "Sue"
+
+serverGamerId :: Maybe Int
+serverGamerId = Just 1337
+
+serverScore :: Maybe Int
+serverScore = Just 9001
+
+justSue = User <$> serverName <*> serverGamerId <*> serverScore
+
+mainUser :: IO ()
+mainUser = do
+    putStrLn "Enter name, gameId, score"
+    user <- User <$> getLine <*> readInt <*> readInt
+    print user
+
+getLatLong :: IO LatLong
+getLatLong = do
+    putStrLn "latitude?"
+    lat <- read <$> getLine
+    putStrLn "longitude?"
+    long <- read <$> getLine
+    return (lat, long)
+
+haversineNoApp = do
+    latLong1 <- getLatLong
+    latLong2 <- getLatLong
+    let res = haversine latLong1 latLong2
+    return res
+
+haversineIO = haversine <$> getLatLong <*> getLatLong
 
 
