@@ -1,6 +1,7 @@
 module Chapter27 where
 
 import qualified Data.Map as Map
+import Data.Maybe
 
 successRequest = Just 1
 
@@ -92,10 +93,26 @@ instance Functor Creature where
     fmap f (Wolf w) = Wolf (f w)
     fmap f (Human h) = Human (f h)
 
-data Box a = Box a deriving Show
+newtype Box a = Box a deriving Show
 
 instance Functor Box where
     fmap f (Box b) = Box (f b)
 
 moreBoxes :: Int -> Box a -> Box [a]
-moreBoxes n b = cycle <$> b -- :(
+moreBoxes n b = replicate n <$> b
+
+newtype Vec a = Vec [a]
+newtype Mat a = Mat [Vec a]
+
+putInBox :: Box a -> Box (Box a)
+putInBox b = Box <$> b
+
+unwrapBox :: Box (Box a) -> Box a
+unwrapBox (Box (b)) = b
+
+lookupMain :: IO ()
+lookupMain = do
+    putStrLn "enter an ID"
+    inp <- readLn
+    let outp = Map.lookup inp partsDb
+    putStrLn (fromJust $ show <$> outp)
