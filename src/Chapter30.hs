@@ -1,3 +1,44 @@
 module Chapter30 where
 
+import qualified Data.Map as Map
+
+type UserName = String
+type GamerId = Int
+type PlayerCredits = Int
+
+names =
+    [   "nYarlathoTep"
+    ,   "KINGinYELL0W"
+    ,   "dagon1997"
+    ,   "rcarter1919"
+    ,   "xCTHULUx"
+    ,   "yogSOThoth"
+    ]
+
+userNameDb :: Map.Map GamerId UserName
+userNameDb = Map.fromList $ zip [1..6] names
+
+creditsDb :: Map.Map UserName PlayerCredits
+creditsDb = Map.fromList $ zip names [2000,15000,300,12,50000,150000]
+
+creditsFromId :: GamerId -> Maybe PlayerCredits
+creditsFromId gid = lookupUserName gid >>= lookupCredits
+
+lookupUserName :: GamerId -> Maybe UserName
+lookupUserName gid = Map.lookup gid userNameDb
+
+lookupCredits :: UserName -> Maybe PlayerCredits
+lookupCredits uname = Map.lookup uname creditsDb
+
+altLookupCredits :: Maybe UserName -> Maybe PlayerCredits
+altLookupCredits Nothing = Nothing
+altLookupCredits (Just uname) = lookupCredits uname
+
+type WillCoId = Int
+
+gamerIdDb :: Map.Map WillCoId GamerId
+gamerIdDb = Map.fromList $ zip [1001..1006] [1..6]
+
+coidToUserName coid = (Map.lookup coid gamerIdDb) >>= lookupUserName
+
 
