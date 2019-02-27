@@ -39,6 +39,26 @@ type WillCoId = Int
 gamerIdDb :: Map.Map WillCoId GamerId
 gamerIdDb = Map.fromList $ zip [1001..1006] [1..6]
 
-coidToUserName coid = (Map.lookup coid gamerIdDb) >>= lookupUserName
+coidToGamerId :: WillCoId -> Maybe GamerId
+coidToGamerId coid = (Map.lookup coid gamerIdDb)
+
+coidToCredits :: WillCoId -> Maybe PlayerCredits
+coidToCredits coid = coidToGamerId coid
+    >>= lookupUserName
+    >>= lookupCredits
 
 
+echo :: IO ()
+echo =  putStrLn "enter a string to be echoed"  >>
+    getLine >>=
+    putStrLn >>
+    putStrLn "ta"
+
+askForName :: IO ()
+askForName = putStrLn "tell me your name"
+
+nameReply name = "Hello, " <> name <> "!"
+
+helloName = (askForName >> getLine)
+    >>= (\x -> return (nameReply x))
+    >>= putStrLn
