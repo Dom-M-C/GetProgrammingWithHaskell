@@ -49,10 +49,10 @@ coidToCredits coid = coidToGamerId coid
 
 
 echo :: IO ()
-echo =  putStrLn "enter a string to be echoed"  >>
-    getLine >>=
-    putStrLn >>
-    putStrLn "ta"
+echo =  putStrLn "enter a string to be echoed"
+    >> getLine
+    >>= putStrLn
+    >> putStrLn "ta"
 
 askForName :: IO ()
 askForName = putStrLn "tell me your name"
@@ -62,3 +62,6 @@ nameReply name = "Hello, " <> name <> "!"
 helloName = (askForName >> getLine)
     >>= (\x -> return (nameReply x))
     >>= putStrLn
+
+allFMapM :: Monad m => (a -> b) -> m a -> m b
+allFMapM f x = x >>= (\y -> return (f y))
