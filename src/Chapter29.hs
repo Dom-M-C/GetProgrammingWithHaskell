@@ -82,7 +82,7 @@ neededBeers = pure (-) <*> beerTarget <*> beersLeft
 --avg :: Num a => [Int] -> a
 avg xs = (sum xs) / (fromIntegral $ length xs)
 
-shouldBuy = target = avg $ map fromIntegral neededBeers
+--shouldBuy = target = avg $ map fromIntegral neededBeers
 
 
 
