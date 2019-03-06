@@ -67,4 +67,4 @@ allFMapM :: Monad m => (a -> b) -> m a -> m b
 allFMapM f x = x >>= (\y -> return (f y))
 
 --allApp :: Monad m => m (a -> b) -> m a -> m b
-allApp f x = return (\y ->  y >>= f) <$> x
+allApp f x = return x >>= f
