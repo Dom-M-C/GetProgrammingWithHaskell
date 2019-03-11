@@ -86,3 +86,5 @@ assesCandidateList candidates = do
     let passed = viable candidate
     return (if passed then "pass" else "nope")
 
+
+
