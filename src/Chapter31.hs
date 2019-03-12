@@ -1,6 +1,8 @@
 module Chapter31 where
 
+import Chapter21
 import qualified Data.Map as Map
+
 
 askForName :: IO ()
 askForName = putStrLn "tell me your name"
@@ -86,5 +88,35 @@ assesCandidateList candidates = do
     let passed = viable candidate
     return (if passed then "pass" else "nope")
 
+assesCandidate :: Monad m => m Candidate -> m String
+assesCandidate candidates = do
+    candidate <- candidates
+    let passed = viable candidate
+    return (if passed then "pass" else "nope")
+
+(|>) = flip ($)
+(.>) = flip (.)
+
+--rewrite of Chapter21.mainPizza
+mainPizzaSansDo :: IO ()
+mainPizzaSansDo =  putStrLn "what is the size of pizza 1" >> getLine
+    >>= (\size1 -> putStrLn "what is the cost of pizza 1" >> getLine
+    >>= (\cost1 -> putStrLn "what is the size of pizza 2" >> getLine
+    >>= (\size2 -> putStrLn "what is the cost of pizza 2" >> getLine
+    >>= (\cost2 -> return (read size1 :: Double, read cost1 :: Double)
+    >>= (\pizza1 -> return (read size2 :: Double, read cost2 :: Double)
+    >>= (\pizza2 -> return (comparePizzas pizza1 pizza2)
+    >>= (\betterPizza -> putStrLn (describePizza betterPizza)
+    >> return ()    ))))))) --lambda festival
 
 
+mainPizzaSansDoAltFormat = putStrLn "what is the size of pizza 1" >>
+    getLine >>= (\size1 -> putStrLn "what is the cost of pizza 1" >>
+    getLine >>= (\cost1 -> putStrLn "what is the size of pizza 2" >>
+    getLine >>= (\size2 -> putStrLn "what is the cost of pizza 2" >>
+    getLine >>= (\cost2 ->
+    return (read size1, cost1) >>= (\pizza1 ->
+    return (read size2, cost2) >>= (\pizza2 ->
+    return (comparePizzas pizza1 pizza2) >>= (\betterPizza ->
+    putStrLn (describePizza betterPizza) >>
+    return ()   )))))))
