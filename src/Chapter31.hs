@@ -109,14 +109,15 @@ mainPizzaSansDo =  putStrLn "what is the size of pizza 1" >> getLine
     >>= (\betterPizza -> putStrLn (describePizza betterPizza)
     >> return ()    ))))))) --lambda festival
 
-
+{-
 mainPizzaSansDoAltFormat = putStrLn "what is the size of pizza 1" >>
     getLine >>= (\size1 -> putStrLn "what is the cost of pizza 1" >>
     getLine >>= (\cost1 -> putStrLn "what is the size of pizza 2" >>
     getLine >>= (\size2 -> putStrLn "what is the cost of pizza 2" >>
     getLine >>= (\cost2 ->
-    return (read size1, cost1) >>= (\pizza1 ->
-    return (read size2, cost2) >>= (\pizza2 ->
+    return (read size1 :: Double, cost1 :: Double) >>= (\pizza1 ->
+    return (read size2 :: Double, cost2 :: Double) >>= (\pizza2 ->
     return (comparePizzas pizza1 pizza2) >>= (\betterPizza ->
     putStrLn (describePizza betterPizza) >>
     return ()   )))))))
+-}
