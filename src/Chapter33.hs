@@ -2,6 +2,7 @@ module Chapter33 where
 
 import System.IO
 import Control.Monad
+import Control.Applicative
 
 data Name = Name
     {   firstName :: String
@@ -17,7 +18,7 @@ print1toN (x:xs) = do
     print1toN xs
 
 data GradeLevel = Freshman
-    | Sophmore
+    | Sophomore
     | Junior
     | Senior
     deriving (Show, Enum, Ord, Eq)
@@ -41,12 +42,12 @@ data Course = Course
 
 students :: [Student]
 students =
-    [   (Student 1 Senior (Name "Audre" "Lorde"))
-    ,   (Student 2 Junior (Name "Leslie" "Silko"))
-    ,   (Student 3 Freshman (Name "Judith" "Butler"))
-    ,   (Student 4 Senior (Name "Guy" "Debord"))
-    ,   (Student 5 Sophmore (Name "Jean" "Baudrillard"))
-    ,   (Student 6 Junior (Name "Julia" "Kristeva"))
+    [   Student 1 Senior (Name "Audre" "Lorde")
+    ,   Student 2 Junior (Name "Leslie" "Silko")
+    ,   Student 3 Freshman (Name "Judith" "Butler")
+    ,   Student 4 Senior (Name "Guy" "Debord")
+    ,   Student 5 Sophomore (Name "Jean" "Baudrillard")
+    ,   Student 6 Junior (Name "Julia" "Kristeva")
     ]
 
 teachers :: [Teacher]
@@ -61,12 +62,12 @@ courses =
     ,   Course 201 "English" 200
     ]
 
-_select :: (a -> b) -> [a] -> [b]
+_select :: Monad m => (a -> b) -> m a -> m b
 _select prop vals = do
     val <- vals
     return (prop val)
 
-_where :: (a -> Bool) -> [a] -> [a]
+_where :: (Monad m, Alternative m) => (a -> Bool) -> m a -> m a
 _where test vals = do
     val <- vals
     guard (test val)
@@ -78,7 +79,7 @@ startsWith c str = c == (head str)
 jStudents = _where (startsWith 'J' . firstName) (_select studentName students)
 
 
-_join :: Eq c => [a] -> [b] -> (a -> c) -> (b -> c) -> [(a, b)]
+_join :: (Eq c, Monad m, Alternative m) => m a -> m b -> (a -> c) -> (b -> c) -> m (a, b)
 _join data1 data2 prop1 prop2 = do
     d1 <- data1
     d2 <- data2
@@ -99,3 +100,19 @@ _hinq selectQuery joinQuery whereQuery =
 finalResult = _hinq (_select (teacherName . fst))
                     (_join teachers courses teacherId teacher)
                     (_where ((=="English") . courseTitle .snd))
+
+data HINQ monad data_ result
+    =   HINQ (monad data_ -> monad result) (monad data_) (monad data_ -> monad data_)
+    |   HINQ_ (monad data_ -> monad result) (monad data_)
+
+runHINQ :: (Monad m, Alternative m) => HINQ m a b -> m b
+runHINQ (HINQ selectC joinC whereC) = _hinq selectC joinC whereC
+runHINQ (HINQ_ selectC joinC) = _hinq selectC joinC (_where (\_ -> True))
+
+query1 :: HINQ [] (Teacher, Course) Name
+query1 = HINQ   (_select (teacherName . fst))
+                (_join teachers courses teacherId teacher)
+                (_where ((=="English") . courseTitle .snd))
+
+query2 :: HINQ [] Teacher Name
+query2 = HINQ_ (_select teacherName) teachers
