@@ -25,6 +25,8 @@ dependencies:
 - random
 - text
 - bytestring
+- QuickCheck
+- quickcheck-instances
 
 library:
   source-dirs: src
