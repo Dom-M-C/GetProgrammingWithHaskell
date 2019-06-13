@@ -1,6 +1,15 @@
-module Lib
-    ( someFunc
-    ) where
+module Lib where
 
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
+import Data.Char(isPunctuation)
+import qualified Data.Text as T
+
+isPalindrome :: T.Text -> Bool
+isPalindrome t = cleanText == T.reverse cleanText
+    where
+        cleanText = preprocess t
+
+preprocess :: T.Text -> T.Text
+preprocess = T.filter (not . isPunctuation)
+
+
+
