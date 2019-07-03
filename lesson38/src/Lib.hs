@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Lib where
+module Lib
+(   isPrime
+,   displayResult
+) where
 
 import qualified Data.Text as T
-
-someFunc :: IO ()
-someFunc = putStrLn "someFunc"
 
 
 myTake :: Int -> [a] -> [a]
@@ -37,4 +37,39 @@ eitherGoodOrBad n
     | n `mod` 2 == 0 = Left Good
     | otherwise = Left Bad
 
+eitherHead :: [a] -> Either String a
+eitherHead [] = Left "empty list"
+eitherHead (x:_) = Right x
 
+intExample :: [Int]
+intExample = [1,2,3]
+
+intExampleEmpty :: [Int]
+intExampleEmpty = []
+
+charExample :: [Char]
+charExample = "cat"
+
+charExampleEmpty :: [Char]
+charExampleEmpty = ""
+
+primes = [2,3,5,7]
+
+maxN = 10
+
+data PrimeError = TooBig | Invalid
+
+instance Show PrimeError where
+    show TooBig = "number too big to calculate prime"
+    show Invalid = "not a candidate"
+
+isPrime :: Int -> Either PrimeError Bool
+isPrime n
+    | n < 2 = Left Invalid
+    | n > maxN = Left TooBig
+    | otherwise = Right (n `elem` primes)
+
+displayResult :: Either PrimeError Bool -> String
+displayResult (Left err) = show err
+displayResult (Right True) = "prime"
+displayResult (Right False) = "nope - composite number"
