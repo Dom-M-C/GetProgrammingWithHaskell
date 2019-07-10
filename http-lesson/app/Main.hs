@@ -10,17 +10,42 @@ import Network.HTTP.Simple
 import Lib
 
 main :: IO ()
-main = someFunc
+main = do
+    response <- httpLBS request
+    let status = getResponseStatusCode response
+    if status == 200
+    then do
+        print "saving request to file"
+        let jsonBody = getResponseBody response
+        L.writeFile "data.json" jsonBody
+    else
+        print "request failed"
 
-
+(|>) = flip ($)
 
 baseUrl endpoint = B.concat ["https://", endpoint]
 
-token :: BC.ByteString
-token = "zCtSqkkpdOnIWKEcUjiGdrOXvTZAcQuP"
+myToken :: BC.ByteString
+myToken = "zCtSqkkpdOnIWKEcUjiGdrOXvTZAcQuP"
 
 noaaHost :: BC.ByteString
 noaaHost = "www.ncdc.noaa.gov"
 
 apiPath :: BC.ByteString
 apiPath = "/cdo-web/api/v2/datasets"
+
+buildRequest :: BC.ByteString -> BC.ByteString -> BC.ByteString -> BC.ByteString
+    -> Request
+buildRequest token host method path = setRequestMethod method
+    $ setRequestHost host
+    $ setRequestHeader "token" [token]
+    $ setRequestPath path
+    $ setRequestSecure True
+    $ setRequestPort 443
+    $ defaultRequest
+
+request :: Request
+request = buildRequest myToken noaaHost "GET" apiPath
+
+
+
