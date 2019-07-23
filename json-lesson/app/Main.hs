@@ -26,3 +26,6 @@ jsonBook = encode myBook
 
 decodedBook :: Maybe Book
 decodedBook = decode jsonBook
+
+wrongJson :: BC.ByteString
+wrongJson = "{\"writer\":\"\"}"
