@@ -29,3 +29,46 @@ decodedBook = decode jsonBook
 
 wrongJson :: BC.ByteString
 wrongJson = "{\"writer\":\"\"}"
+
+data ErrorMessage = ErrorMessage
+    {   message :: T.Text
+    ,   errorCode :: Int
+    } deriving Show
+
+instance FromJSON ErrorMessage where
+    parseJSON (Object v) = ErrorMessage
+        <$> v .: "message"
+        <*> v .: "error"
+
+data Name = Name
+    {   firstName :: T.Text
+    ,   lastName :: T.Text
+    } deriving Show
+
+instance FromJSON Name where
+    parseJSON (Object v) = Name
+        <$> v .: "firstName"
+        <*> v .: "lastName"
+
+exampleMessage :: Maybe T.Text
+exampleMessage = Just "oops"
+
+exampleError :: Maybe Int
+exampleError = Just 123
+
+sampleError :: Maybe ErrorMessage
+sampleError = ErrorMessage
+    <$> exampleMessage
+    <*> exampleError
+
+instance ToJSON ErrorMessage where
+    toJSON (ErrorMessage msg errCode) =
+        object  [   "message" .= msg
+                ,   "error" .= errCode
+                ]
+
+jsonErrorMessage :: Maybe BC.ByteString
+jsonErrorMessage = encode <$> sampleError
+
+andBackAgain :: Maybe ErrorMessage
+andBackAgain = decode <$> jsonErrorMessage
