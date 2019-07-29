@@ -1,5 +1,6 @@
 module Main where
 
+import Control.Monad
 import Data.Aeson
 import Data.Text as T
 import Data.ByteString.Lazy as B
@@ -70,5 +71,39 @@ instance ToJSON ErrorMessage where
 jsonErrorMessage :: Maybe BC.ByteString
 jsonErrorMessage = encode <$> sampleError
 
-andBackAgain :: Maybe ErrorMessage
-andBackAgain = decode <$> jsonErrorMessage
+data NOAAResult = NOAAResult
+    {   uid :: T.Text
+    ,   mindate :: T.Text
+    ,   maxdate :: T.Text
+    ,   name :: T.Text
+    ,   datacoverage :: T.Text
+    ,   resultId :: T.Text
+    }   deriving Show
+
+instance FromJSON NOAAResult where
+    parseJSON (Object v) = NOAAResult
+        <$> v .: "uid"
+        <*> v .: "mindate"
+        <*> v .: "maxdate"
+        <*> v .: "name"
+        <*> v .: "datacoverage"
+        <*> v .: "id"
+
+data Resultset = Resultset
+    {   offset :: Int
+    ,   count :: Int
+    ,   limit :: Int
+    } deriving (Show, Generic)
+instance FromJSON Resultset
+
+data Metadata = Metadata
+    {   resultset :: Resultset
+    } deriving (Show, Generic)
+instance FromJSON Metadata
+
+data NOAAResponse = NOAAResponse
+    {   metadata :: Metadata
+    ,   results :: [Results]
+    } deriving (Show, Generic)
+instance FromJSON NOAAResponse
+
