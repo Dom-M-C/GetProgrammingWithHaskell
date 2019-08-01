@@ -7,10 +7,6 @@ import Data.ByteString.Lazy as B
 import Data.ByteString.Lazy.Char8 as BC
 import GHC.Generics
 
-main :: IO ()
-main = print "hi"
-
-
 data Book = Book
     {   title :: T.Text
     ,   author :: T.Text
@@ -76,7 +72,7 @@ data NOAAResult = NOAAResult
     ,   mindate :: T.Text
     ,   maxdate :: T.Text
     ,   name :: T.Text
-    ,   datacoverage :: T.Text
+    ,   datacoverage :: Float
     ,   resultId :: T.Text
     }   deriving Show
 
@@ -103,7 +99,23 @@ instance FromJSON Metadata
 
 data NOAAResponse = NOAAResponse
     {   metadata :: Metadata
-    ,   results :: [Results]
+    ,   results :: [NOAAResult]
     } deriving (Show, Generic)
 instance FromJSON NOAAResponse
+
+
+
+printResults :: Either String [NOAAResult] -> IO ()
+printResults (Left x) = print x
+printResults (Right results) = do
+    forM_ results (print . name)
+
+main :: IO ()
+main = do
+    jsonData <- B.readFile "data.json"
+    let noaaResponse = eitherDecode jsonData :: Either String NOAAResponse
+    let noaaResults = results <$> noaaResponse
+    printResults noaaResults
+
+
 
