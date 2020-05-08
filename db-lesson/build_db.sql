@@ -6,11 +6,13 @@ Drop table if exists Users;
 Create table [User]
 (   Id Integer Primary Key
 ,   UserName Text
+
+,   CONSTRAINT UK_User_UserName UNIQUE (UserName)
 );
 
 Create table Tool
 (   Id Integer Primary Key
-,   Name Text
+,   Name Text UNIQUE
 ,   Description Text
 ,   LastReturned Text
 ,   TimesBorrowed Integer
