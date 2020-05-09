@@ -1,10 +1,10 @@
-name:                GetProgrammingWithHaskell
+name:                lesson38
 version:             0.1.0.0
-github:              "githubuser/GetProgrammingWithHaskell"
+github:              "githubuser/lesson38"
 license:             BSD3
 author:              "Author name here"
 maintainer:          "example@example.com"
-copyright:           "2018 Author name here"
+copyright:           "2019 Author name here"
 
 extra-source-files:
 - README.md
@@ -17,33 +17,30 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/GetProgrammingWithHaskell#readme>
+description:         Please see the README on GitHub at <https://github.com/githubuser/lesson38#readme>
 
 dependencies:
 - base >= 4.7 && < 5
-- containers
-- random
 - text
-- bytestring
 
 library:
   source-dirs: src
-  default-extensions:
-    - OverloadedStrings
 
 executables:
-  GetProgrammingWithHaskell-exe:
+  lesson38-exe:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -Wall
+    - -OverloadedStrings
     dependencies:
-    - GetProgrammingWithHaskell
+    - lesson38
 
 tests:
-  GetProgrammingWithHaskell-test:
+  lesson38-test:
     main:                Spec.hs
     source-dirs:         test
     ghc-options:
@@ -51,6 +48,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - GetProgrammingWithHaskell
-
-
+    - lesson38

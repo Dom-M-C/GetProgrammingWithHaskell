@@ -20,7 +20,7 @@ instance Bounded CipherAlphabet where
 -}
 class LowerCaseChar a => CipherZ a where
     encrypt :: a -> a
-    decrypt :: a -> a
+    --decrypt :: a -> a
 
 
 instance CipherZ Char where
